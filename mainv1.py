@@ -36,9 +36,7 @@ def rand_selection_kplus10(k,tx_list_gen, tx_list_msg):
 	#rx_mat_gen=
 	rx_list_gen = [ tx_list_gen[m] for m in chosen_list]
 	rx_list_msg = [ matrix(GF(2),tx_list_msg[m]) for m in chosen_list]
-	print rx_list_msg#debug
-	print ("yeah ")#debug
-	print type(rx_list_msg) #debug
+	
 	return rx_list_gen, rx_list_msg
 
 #Gaussian elimination
@@ -126,16 +124,16 @@ def solve_triangular_matrix(in_mat_gene, in_mat_msg):
 			break   #cant continue with last row
 		
 		for j in range( i+1, no_cols ):
-			print ("row %s, col %s, val %s" %(i,j,in_mat_gene[i].column(j))) #debug
+			
 			if in_mat_gene[i].column(j) != 0:  #	j > i, pivot value wont be affected
-				print ("xorrrrr") #debug
+				
 				in_mat_gene = row_ops(in_mat_gene, j, i, 'xor')
 				in_mat_msg = row_ops(in_mat_msg, j, i, 'xor')
 				
 	return in_mat_gene, in_mat_msg	
 
 #main function
-def main():
+def main(debug_opt=0):
 	msg_length = 5
 	k = msg_length 
 	msg_mat = rand_msg_generation(k)
@@ -148,35 +146,35 @@ def main():
 		tx_list_gene.append(gene)
 		tx_list_msg[i]=coded_msg
 		tx_list_msg.transpose()
-		
-	#check method to use multi return function
+	
+	if debug_opt==1 : print("tx_gen\n %s" %(tx_list_gene))
+	if debug_opt==1 : print("tx_msg\n %s" %(tx_list_msg))
+	
+	
 	rx_list_gene,rx_list_msg = rand_selection_kplus10(k,tx_list_gene, tx_list_msg)
+	
+	if debug_opt==1 : print("rx_gen\n %s" %(rx_list_gene))
+	if debug_opt==1 : print("rx_msg\n %s" %(rx_list_msg))
 				
 	tri_mat_gene,tri_mat_msg= triangle_mat_decompo(rx_list_gene, rx_list_msg)
 	
-	print ("triangle")#debug
-	print tri_mat_gene #debug
-	print tri_mat_msg #debug
-	
-	inden_mat_gene,decode_msg= solve_triangular_matrix(tri_mat_gene, tri_mat_msg)
+	if debug_opt==1 : print("tri_gen\n %s" %(tri_mat_gene))
+	if debug_opt==1 : print("tri_msg\n %s" %(tri_mat_msg))
+		
+	iden_mat_gene,decode_msg= solve_triangular_matrix(tri_mat_gene, tri_mat_msg)
 
+	if debug_opt==1 : print("identi_gen\n %s" %(iden_mat_gene))
+	if debug_opt==1 : print("decode_msg\n %s" %(decode_msg))
+	
 	#change data format for ori_msg to match of decode_msg
 	ori_msg=[ matrix(GF(2),msg_mat[i]) for i in range(msg_length)]
 	
-		
+	if debug_opt==1 : print("ori\n %s" %(ori_msg)) 
+	
 	#check if decode_msg = ori_msg
 	if decode_msg == ori_msg:
 		print("decode success")
 	else:
 		print("decode fail")
-	
-	print inden_mat_gene #debug
-	print decode_msg #debug
-	print type(decode_msg)
-	print ori_msg
-	print type(ori_msg)
-	print msg_mat #debug
-	print type(msg_mat)
-	
-	
+			
 main()
