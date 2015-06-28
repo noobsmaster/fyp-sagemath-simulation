@@ -73,12 +73,11 @@ def triangle_mat_decompo(input_mat_gene, input_mat_msg):
 		#note: possible improvement, instead scanning until bottom, scan until encounter a pivot
 		# identify rows with pivot at [pivot] column 
 		pivot_rows = []
-			
+		
 		for i in range(pivot, no_rows):
-						
+			
 			if input_mat_gene[i].column(pivot) != 0:
 				pivot_rows.append(i)
-				print pivot_rows#debug
 						
 		if len(pivot_rows) == 0: 	#fail to find pivot, decoding fails.
 			print ("Decompose fail, unable to find pivot for col %s" %pivot) 
@@ -89,11 +88,9 @@ def triangle_mat_decompo(input_mat_gene, input_mat_msg):
 			input_mat_gene = row_ops(input_mat_gene, pivot, pivot_rows[0], 'ex')
 			input_mat_msg = row_ops(input_mat_msg, pivot, pivot_rows[0], 'ex')
 			del pivot_rows[0]
-			print pivot_rows #debug
 		
 		#clearing values in [pivot] column below the [pivot] row
 		for i in pivot_rows:
-			print i #debug
 			if pivot == (no_cols): 	break	# the triangle matrix has been formed, no point continuing
 			
 			input_mat_gene= row_ops(input_mat_gene, i, pivot, 'xor')
@@ -118,7 +115,7 @@ def solve_triangular_matrix(in_mat_gene, in_mat_msg):
 			break   #cant continue with last row
 		
 		for j in range( i+1, no_cols ):  
-			if in_mat_gene[i].column(j) == 1:			#	j > i, pivot value wont be affected
+			if in_mat_gene[i][j] == 1:			#	j > i, pivot value wont be affected
 				in_mat_gene = row_ops(in_mat_gene, in_mat_gene[i], in_mat_gene[j], 'xor')
 				in_mat_msg = row_ops(in_mat_msg, in_mat_msg[i], in_mat_msg[j], 'xor')
 				
@@ -144,9 +141,6 @@ def main():
 				
 	tri_mat_gene,tri_mat_msg= triangle_mat_decompo(rx_list_gene, rx_list_msg)
 	
-	print tri_mat_gene
-	print tri_mat_msg
-	
 	inden_mat_gene,decode_msg= solve_triangular_matrix(tri_mat_gene, tri_mat_msg)
 
 	#check if decode_msg = ori_msg
@@ -154,6 +148,5 @@ def main():
 		print("decode success")
 	else:
 		print("decode fail")
-	
-	
+
 main()
