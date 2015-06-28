@@ -47,20 +47,21 @@ def rand_selection_kplus10(k,tx_list_gen, tx_list_msg):
 #to acquire decoded msg
 
 #row operation functions, xor and exchange
-def row_ops (matrix, source_i, des_i, mode): 
+def row_ops (in_matrix, source_i, des_i, mode): 
 	
 	if mode == 'ex': #exchange mode, swaps row
-		row_op_temp = []
-		row_op_temp = matrix[source_i]
-		matrix[des_i] = matrix[source_i]
-		matrix[source_i] = row_op_temp
 		
-		return matrix
+		
+		row_op_temp = in_matrix[source_i]
+		in_matrix[source_i] = in_matrix[des_i]
+		in_matrix[des_i] = row_op_temp
+		
+		return in_matrix
 		
 	if mode == 'xor' :	#xor operation mode, des=des xor source
-		matrix[des_i] = matrix[des_i]+matrix[source_i]
+		in_matrix[des_i] = in_matrix[des_i]+in_matrix[source_i]
 		
-		return matrix
+		return in_matrix
 	
 #reducing matrix to triangular form, separate list for generator and message
 def triangle_mat_decompo(input_mat_gene, input_mat_msg):
@@ -78,7 +79,7 @@ def triangle_mat_decompo(input_mat_gene, input_mat_msg):
 						
 			if input_mat_gene[i].column(pivot) != 0:
 				pivot_rows.append(i)
-				print pivot_rows#debug
+				
 						
 		if len(pivot_rows) == 0: 	#fail to find pivot, decoding fails.
 			print ("Decompose fail, unable to find pivot for col %s" %pivot) 
@@ -86,21 +87,26 @@ def triangle_mat_decompo(input_mat_gene, input_mat_msg):
 			
 		#putting the first pivot rows to the top
 		if pivot_rows[0] != pivot :
+			
 			input_mat_gene = row_ops(input_mat_gene, pivot, pivot_rows[0], 'ex')
 			input_mat_msg = row_ops(input_mat_msg, pivot, pivot_rows[0], 'ex')
-			del pivot_rows[0]
-			print pivot_rows #debug
+		
+		del pivot_rows[0]
+		
 		
 		#clearing values in [pivot] column below the [pivot] row
-		for i in pivot_rows:
-			print i #debug
-			if pivot == (no_cols): 	break	# the triangle matrix has been formed, no point continuing
+		while len(pivot_rows) != 0:
+			i=pivot_rows[0]
 			
-			input_mat_gene= row_ops(input_mat_gene, i, pivot, 'xor')
-			input_mat_msg = row_ops(input_mat_msg, i, pivot, 'xor')
-			pivot_rows.remove(i)
+			if pivot == (no_cols-1): 	break	# the triangle matrix has been formed, no point continuing
 			
-	if pivot == (no_cols):
+			
+			input_mat_gene= row_ops(input_mat_gene, pivot, i, 'xor')
+			input_mat_msg = row_ops(input_mat_msg, pivot, i, 'xor')
+			
+			del pivot_rows[0]
+						
+	if pivot == (no_cols-1):
 		del	input_mat_gene[no_cols:no_rows]  #removing bottom part of matrix
 		del input_mat_msg[no_cols:no_rows] 	#^^
 	
@@ -117,10 +123,12 @@ def solve_triangular_matrix(in_mat_gene, in_mat_msg):
 		if i == no_rows:
 			break   #cant continue with last row
 		
-		for j in range( i+1, no_cols ):  
-			if in_mat_gene[i].column(j) == 1:			#	j > i, pivot value wont be affected
-				in_mat_gene = row_ops(in_mat_gene, in_mat_gene[i], in_mat_gene[j], 'xor')
-				in_mat_msg = row_ops(in_mat_msg, in_mat_msg[i], in_mat_msg[j], 'xor')
+		for j in range( i+1, no_cols ):
+			print ("row %s, col %s, val %s" %(i,j,in_mat_gene[i].column(j))) #debug
+			if in_mat_gene[i].column(j) != 0:  #	j > i, pivot value wont be affected
+				print ("xorrrrr") #debug
+				in_mat_gene = row_ops(in_mat_gene, j, i, 'xor')
+				in_mat_msg = row_ops(in_mat_msg, j, i, 'xor')
 				
 	return in_mat_gene, in_mat_msg	
 
@@ -144,16 +152,28 @@ def main():
 				
 	tri_mat_gene,tri_mat_msg= triangle_mat_decompo(rx_list_gene, rx_list_msg)
 	
-	print tri_mat_gene
-	print tri_mat_msg
+	print ("triangle")#debug
+	print tri_mat_gene #debug
+	print tri_mat_msg #debug
 	
 	inden_mat_gene,decode_msg= solve_triangular_matrix(tri_mat_gene, tri_mat_msg)
 
+	#check data format for ori_msg to match of decode_msg
+	ori_msg=[]
+	for i in range(msg_length):
+		ori_msg.append(msg_mat[i])
+		
 	#check if decode_msg = ori_msg
-	if decode_msg == msg_mat:
+	if decode_msg == ori_msg:
 		print("decode success")
 	else:
 		print("decode fail")
+	
+	print inden_mat_gene #debug
+	print decode_msg #debug
+	print ori_msg
+	print msg_mat #debug
+	
 	
 	
 main()
