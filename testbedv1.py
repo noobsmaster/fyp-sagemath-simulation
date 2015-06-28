@@ -133,9 +133,8 @@ def solve_triangular_matrix(in_mat_gene, in_mat_msg):
 	return in_mat_gene, in_mat_msg	
 
 #main function
-def main(debug_opt=0):
-	msg_length = 5
-	k = msg_length 
+def main(k, debug_opt=0):
+	 
 	msg_mat = rand_msg_generation(k)
 	tx_list_gene=[]
 	tx_list_msg =matrix(GF(2), k+30, 1)
@@ -167,7 +166,7 @@ def main(debug_opt=0):
 	if debug_opt==1 : print("decode_msg\n %s" %(decode_msg))
 	
 	#change data format for ori_msg to match of decode_msg
-	ori_msg=[ matrix(GF(2),msg_mat[i]) for i in range(msg_length)]
+	ori_msg=[ matrix(GF(2),msg_mat[i]) for i in range(k)]
 	
 	if debug_opt==1 : print("ori\n %s" %(ori_msg)) 
 	
@@ -181,16 +180,19 @@ def main(debug_opt=0):
 		return False
 
 failure = 0		
-for rpt_i in range(10000):
+sample_size = 100000
+k=5
+for rpt_i in range(sample_size):
 		
-	result = main()
+	result = main(k)
 	if result == False :
 		failure +=1
-		print ("fail")
-	if rpt_i==1000 :
-		print ("milestone 1")
 
-print failure
+print ("For test case for k=%d running for %d times :" %(k,sample_size))
+percent_fail= 100*failure/sample_size
+percent_success = 100 - percent_fail
+print ("Failure percentage = %f" %(percent_fail))
+print ("Success percentage = %f" %percent_success)
 	
 	
 	

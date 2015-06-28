@@ -1,0 +1,31 @@
+Report for random code encoding and decoding with Gaussian eliminations method
+
+This short report will present the findings of simulation done on Random Code, a rate-less erasure code.
+The simulation is done on SageMath platform and the codes for simulation is written with python programming language.
+The simulation test on the success probability of decoding with k+10 symbol generated using random code to obtain original message.
+
+The simulation starts with random generation of single column message vector(x) with a predetermined length, message length (k), followed by random generation of single row generator vector(G) with k-element. An encoded symbol (m) is obtained by multiplying the generator vector and message vector (G times x). The random generation of G and thus the production of symbol m is continued until the number of m equals to message length plus 30 (k+30).
+
+Of the k+30 m produced, a k+10 number of m is selected randomly to be decoded, to simulate the random loss occurred in practical situation. Decoding of the m symbols is done using Gaussian elimination method. The corresponding generator G of the selected m symbol is aligned to form a matrix by the dimension  (k+10, k). The matrix is then reduced to a identity matrix of dimension (k, k). The k+10 number of m symbols are aligned to a single column vector and undergoes the same row operations that occur in reduction of matrix of G. The result of the symbol vector will then be the decoded message and should be identical to the original message generated at the beginning. Comparison is done between decoded message and original message. If decoded message is not identical , the decoding is considered failed.
+
+Message length tested are, k= 3, 5, 8, 10, 50, 1000 and all cased are tested for 100,000 times.
+
+Result
+
+For test case for k=3 running for 100000 times :
+Failure percentage = 0.069000
+Success percentage = 99.931000
+
+For test case for k=5 running for 100000 times :
+Failure percentage = 0.080000
+Success percentage = 99.920000
+
+For test case for k=8 running for 100000 times :
+Failure percentage = 0.078000
+Success percentage = 99.922000
+
+For test case for k=10 running for 100000 times :
+Failure percentage = 0.078000
+Sucess percentage = 99.922000
+
+
