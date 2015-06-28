@@ -36,7 +36,9 @@ def rand_selection_kplus10(k,tx_list_gen, tx_list_msg):
 	#rx_mat_gen=
 	rx_list_gen = [ tx_list_gen[m] for m in chosen_list]
 	rx_list_msg = [ matrix(GF(2),tx_list_msg[m]) for m in chosen_list]
-	
+	print rx_list_msg#debug
+	print ("yeah ")#debug
+	print type(rx_list_msg) #debug
 	return rx_list_gen, rx_list_msg
 
 #Gaussian elimination
@@ -158,10 +160,9 @@ def main():
 	
 	inden_mat_gene,decode_msg= solve_triangular_matrix(tri_mat_gene, tri_mat_msg)
 
-	#check data format for ori_msg to match of decode_msg
-	ori_msg=[]
-	for i in range(msg_length):
-		ori_msg.append(msg_mat[i])
+	#change data format for ori_msg to match of decode_msg
+	ori_msg=[ matrix(GF(2),msg_mat[i]) for i in range(msg_length)]
+	
 		
 	#check if decode_msg = ori_msg
 	if decode_msg == ori_msg:
@@ -171,9 +172,11 @@ def main():
 	
 	print inden_mat_gene #debug
 	print decode_msg #debug
+	print type(decode_msg)
 	print ori_msg
+	print type(ori_msg)
 	print msg_mat #debug
-	
+	print type(msg_mat)
 	
 	
 main()
