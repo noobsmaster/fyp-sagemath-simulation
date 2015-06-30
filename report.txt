@@ -26,7 +26,7 @@ Success percentage = 99.922000
 
 For test case for k=10 running for 100000 times :
 Failure percentage = 0.078000
-Sucess percentage = 99.922000
+Success percentage = 99.922000
 
 For test case for k=50 running for 100000 times :
 Failure percentage = 0.058000
