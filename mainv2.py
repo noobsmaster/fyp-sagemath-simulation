@@ -4,11 +4,40 @@ import random
 #read documentation for random lib
 #read documentation for bit array lib
 
-def random_gene_generation(msg_length):
+#random row generation, the generation is on demand, rather then generating whole matrix before hand
+def rand_gene_generation(msg_length):	# 1row x k-column
 	
-	return 
+	gene_row = BitArray( [ random.choice ( [1,0] ) for i in range(msg_length) ] )
+	
+	return gene_row
+	
 
-	#Gaussian elimination
+#generate 1 column of random sym for msg randomize purpose	
+def rand_msg_generation(msg_length):
+	
+	msg_col = [ BitArray( [random.choice ( [1,0] )] ) for i in range(msg_length) ]
+	
+	return msg_col			# k-row x 1column 
+
+#random selection of Tx data #not dones
+def rand_selection_kplus10(tx_list_gen, tx_list_msg):
+	tx_pool_no = len(tx_list_gen)
+	tx_pool_list= [m for m in range(tx_pool_no)]
+	chosen_list = []
+	no_element_chosen = 0
+	while no_element_chosen < k+10 :
+		rand_choose = random_between(0, tx_pool_no-1 )
+		chosen_list.append( tx_pool_list.pop(rand_choose))
+		no_element_chosen += 1
+		tx_pool_no -= 1
+	
+	#rx_mat_gen=
+	rx_list_gen = [ tx_list_gen[m] for m in chosen_list]
+	rx_list_msg = [ matrix(GF(2),tx_list_msg[m]) for m in chosen_list]
+	
+	return rx_list_gen, rx_list_msg
+	
+#Gaussian elimination
 #1. search for row starts with 1 in 1st column, exchange with 1st row
 #2. XOR/ADD row that starts with 1 in 1st column, 
 #3. 
