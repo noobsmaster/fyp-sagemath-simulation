@@ -22,11 +22,11 @@ def rand_msg_generation(msg_length):
 
 #random selection of ten Tx data 
 def rand_selection_kplus10(tx_list_gen, tx_list_msg):
-	k = len(tx_list_gen)
+	k = len(tx_list_gen[0])
 	pool_index_list = list( range( len(tx_list_gen) ) )
 	chosen_list = []
-	
-	while len(chosen_list) < k+10:
+		
+	for i in range(k+10):
 		chosen_list.append( pool_index_list.pop( random.randrange( len(pool_index_list))))
 		
 	rx_list_gen = [ tx_list_gen[m] for m in chosen_list]
@@ -118,7 +118,7 @@ def solve_triangular_matrix(in_mat_gene, in_mat_msg):
 		
 		for j in range( i+1, no_cols ):
 			
-			if in_mat_gene[i].column(j) != 0:  #	j > i, pivot value wont be affected
+			if in_mat_gene[i][j] != 0:  #	j > i, pivot value wont be affected
 				
 				in_mat_gene = row_ops(in_mat_gene, j, i, 'xor')
 				in_mat_msg = row_ops(in_mat_msg, j, i, 'xor')
@@ -155,7 +155,7 @@ def main(debug_opt=0):
 	if debug_opt==1 : print("tx_msg\n %s" %(tx_list_msg))
 	
 	
-	rx_list_gene,rx_list_msg = rand_selection_kplus10(k,tx_list_gene, tx_list_msg)
+	rx_list_gene,rx_list_msg = rand_selection_kplus10(tx_list_gene, tx_list_msg)
 	
 	if debug_opt==1 : print("rx_gen\n %s" %(rx_list_gene))
 	if debug_opt==1 : print("rx_msg\n %s" %(rx_list_msg))
@@ -169,14 +169,11 @@ def main(debug_opt=0):
 
 	if debug_opt==1 : print("identi_gen\n %s" %(iden_mat_gene))
 	if debug_opt==1 : print("decode_msg\n %s" %(decode_msg))
+		
+	if debug_opt==1 : print("ori\n %s" %(msg_list)) 
 	
-	#change data format for ori_msg to match of decode_msg
-	ori_msg=[ matrix(GF(2),msg_mat[i]) for i in range(msg_length)]
-	
-	if debug_opt==1 : print("ori\n %s" %(ori_msg)) 
-	
-	#check if decode_msg = ori_msg
-	if decode_msg == ori_msg:
+	#check if decode_msg = ori msg
+	if decode_msg == msg_list:
 		print("decode success")
 	else:
 		print("decode fail")
