@@ -75,7 +75,7 @@ def triangle_mat_decompo(input_mat_gene, input_mat_msg):
 				
 						
 		if len(pivot_rows) == 0: 	#fail to find pivot, decoding fails.
-			print ("Decompose fail, unable to find pivot for col %s" %pivot) 
+			
 			break
 			
 		#putting the first pivot rows to the top
@@ -136,9 +136,8 @@ def msg_encoding(gen_row, msg_list):
 	return 	encoded_symbol
 
 #main	
-def main(debug_opt=0):
-	msg_length = 5
-	k = msg_length 
+def main(k, debug_opt=0):
+	
 	msg_list = rand_msg_generation(k)
 	tx_list_gene= []
 	tx_list_msg = []
@@ -149,11 +148,9 @@ def main(debug_opt=0):
 		tx_list_gene.append(gene)
 		tx_list_msg.append(coded_sym)
 		
-	
 	if debug_opt==1 : print("tx_gen\n %s" %(tx_list_gene))
 	if debug_opt==1 : print("tx_msg\n %s" %(tx_list_msg))
-	
-	
+		
 	rx_list_gene,rx_list_msg = rand_selection_kplus10(tx_list_gene, tx_list_msg)
 	
 	if debug_opt==1 : print("rx_gen\n %s" %(rx_list_gene))
@@ -173,8 +170,24 @@ def main(debug_opt=0):
 	
 	#check if decode_msg = ori msg
 	if decode_msg == msg_list:
-		print("decode success")
+		if debug_opt==1 : print("decode success")
+		return True
+		
 	else:
-		print("decode fail")
-			
-main()
+		if debug_opt==1 : print("decode fail")
+		return False
+
+failure = 0		
+sample_size = 1000
+k=5
+for rpt_i in range(sample_size):
+		
+	result = main(k)
+	if result == False :
+		failure +=1
+
+print ("For test case for k=%d running for %d times :" %(k,sample_size))
+percent_fail= 100*failure/sample_size
+percent_success = 100 - percent_fail
+print ("Failure percentage = %f" %(percent_fail))
+print ("Success percentage = %f" %percent_success)
