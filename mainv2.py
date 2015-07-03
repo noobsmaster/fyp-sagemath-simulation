@@ -19,24 +19,22 @@ def rand_msg_generation(msg_length):
 	
 	return msg_col			# k-row x 1column 
 
-#random selection of Tx data #not dones
+
+#random selection of ten Tx data 
 def rand_selection_kplus10(tx_list_gen, tx_list_msg):
-	tx_pool_no = len(tx_list_gen)
-	tx_pool_list= [m for m in range(tx_pool_no)]
+	k = len(tx_list_gen)
+	pool_index_list = list( range( len(tx_list_gen) ) )
 	chosen_list = []
-	no_element_chosen = 0
-	while no_element_chosen < k+10 :
-		rand_choose = random_between(0, tx_pool_no-1 )
-		chosen_list.append( tx_pool_list.pop(rand_choose))
-		no_element_chosen += 1
-		tx_pool_no -= 1
 	
-	#rx_mat_gen=
+	while len(chosen_list) < k+10:
+		chosen_list.append( pool_index_list.pop( random.randrange( len(pool_index_list))))
+		
 	rx_list_gen = [ tx_list_gen[m] for m in chosen_list]
-	rx_list_msg = [ matrix(GF(2),tx_list_msg[m]) for m in chosen_list]
+	rx_list_msg = [ tx_list_msg[m] for m in chosen_list]
 	
 	return rx_list_gen, rx_list_msg
-	
+
+
 #Gaussian elimination
 #1. search for row starts with 1 in 1st column, exchange with 1st row
 #2. XOR/ADD row that starts with 1 in 1st column, 
@@ -47,20 +45,18 @@ def rand_selection_kplus10(tx_list_gen, tx_list_msg):
 #row operation functions, xor and exchange
 def row_ops (in_matrix, source_i, des_i, mode): 
 	
-	if mode == 'ex': #exchange mode, swaps row
+	if mode == 'ex': #exchange mode, swaps row (only 1 line, consider integration)
 		
-		
-		row_op_temp = in_matrix[source_i]
-		in_matrix[source_i] = in_matrix[des_i]
-		in_matrix[des_i] = row_op_temp
+		in_matrix[source_i],in_matrix[des_i] = in_matrix[des_i],in_matrix[source_i]
 		
 		return in_matrix
 		
-	if mode == 'xor' :	#xor operation mode, des=des xor source
-		in_matrix[des_i] = in_matrix[des_i]+in_matrix[source_i]
+	if mode == 'xor' :	#xor operation mode, des=des xor source (only 1 line, consider integration)
+		in_matrix[des_i] = in_matrix[des_i]^in_matrix[source_i]
 		
 		return in_matrix
 
+###
 #reducing matrix to triangular form, separate list for generator and message
 def triangle_mat_decompo(input_mat_gene, input_mat_msg):
 	
@@ -75,7 +71,7 @@ def triangle_mat_decompo(input_mat_gene, input_mat_msg):
 			
 		for i in range(pivot, no_rows):
 						
-			if input_mat_gene[i].column(pivot) != 0:
+			if input_mat_gene[i][pivot] != 0:
 				pivot_rows.append(i)
 				
 						
@@ -114,7 +110,7 @@ def triangle_mat_decompo(input_mat_gene, input_mat_msg):
 def solve_triangular_matrix(in_mat_gene, in_mat_msg):
 	
 	no_rows = len(in_mat_gene)  #number of rows of mat
-	no_cols = in_mat_gene[0].ncols() #number of columns of mat
+	no_cols = len(in_mat_gene[0]) #number of columns of mat
 	
 	for i in range(no_rows):		
 		
@@ -129,3 +125,60 @@ def solve_triangular_matrix(in_mat_gene, in_mat_msg):
 				in_mat_msg = row_ops(in_mat_msg, j, i, 'xor')
 				
 	return in_mat_gene, in_mat_msg	
+
+#multiplication of vector for encoding
+def msg_encoding(gen_row, msg_list):
+	k=len(msg_list)
+	encoded_symbol = BitArray('0b0')
+	for i in range(k):
+		if msg_list[i] != 0 and gen_row[i] != 0:
+			encoded_symbol = encoded_symbol^BitArray('0b1')
+	
+	return 	encoded_symbol
+	
+#main	
+def main(debug_opt=0):
+	msg_length = 5
+	k = msg_length 
+	msg_mat = rand_msg_generation(k)
+	tx_list_gene=[]
+	tx_list_msg =matrix(GF(2), k+30, 1)
+	
+	for i in range(k+30):
+		gene=rand_gene_generation(k)
+		coded_msg= gene*msg_mat
+		tx_list_gene.append(gene)
+		tx_list_msg[i]=coded_msg
+		tx_list_msg.transpose()
+	
+	if debug_opt==1 : print("tx_gen\n %s" %(tx_list_gene))
+	if debug_opt==1 : print("tx_msg\n %s" %(tx_list_msg))
+	
+	
+	rx_list_gene,rx_list_msg = rand_selection_kplus10(k,tx_list_gene, tx_list_msg)
+	
+	if debug_opt==1 : print("rx_gen\n %s" %(rx_list_gene))
+	if debug_opt==1 : print("rx_msg\n %s" %(rx_list_msg))
+				
+	tri_mat_gene,tri_mat_msg= triangle_mat_decompo(rx_list_gene, rx_list_msg)
+	
+	if debug_opt==1 : print("tri_gen\n %s" %(tri_mat_gene))
+	if debug_opt==1 : print("tri_msg\n %s" %(tri_mat_msg))
+		
+	iden_mat_gene,decode_msg= solve_triangular_matrix(tri_mat_gene, tri_mat_msg)
+
+	if debug_opt==1 : print("identi_gen\n %s" %(iden_mat_gene))
+	if debug_opt==1 : print("decode_msg\n %s" %(decode_msg))
+	
+	#change data format for ori_msg to match of decode_msg
+	ori_msg=[ matrix(GF(2),msg_mat[i]) for i in range(msg_length)]
+	
+	if debug_opt==1 : print("ori\n %s" %(ori_msg)) 
+	
+	#check if decode_msg = ori_msg
+	if decode_msg == ori_msg:
+		print("decode success")
+	else:
+		print("decode fail")
+			
+main()
