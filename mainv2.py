@@ -56,7 +56,6 @@ def row_ops (in_matrix, source_i, des_i, mode):
 		
 		return in_matrix
 
-###
 #reducing matrix to triangular form, separate list for generator and message
 def triangle_mat_decompo(input_mat_gene, input_mat_msg):
 	
@@ -131,25 +130,26 @@ def msg_encoding(gen_row, msg_list):
 	k=len(msg_list)
 	encoded_symbol = BitArray('0b0')
 	for i in range(k):
-		if msg_list[i] != 0 and gen_row[i] != 0:
+		if msg_list[i][0] != 0 and gen_row[i] != 0:
 			encoded_symbol = encoded_symbol^BitArray('0b1')
 	
 	return 	encoded_symbol
-	
+
+###
 #main	
 def main(debug_opt=0):
 	msg_length = 5
 	k = msg_length 
-	msg_mat = rand_msg_generation(k)
-	tx_list_gene=[]
-	tx_list_msg =matrix(GF(2), k+30, 1)
+	msg_list = rand_msg_generation(k)
+	tx_list_gene= []
+	tx_list_msg = []
 	
 	for i in range(k+30):
 		gene=rand_gene_generation(k)
-		coded_msg= gene*msg_mat
+		coded_sym = msg_encoding(gene, msg_list)
 		tx_list_gene.append(gene)
-		tx_list_msg[i]=coded_msg
-		tx_list_msg.transpose()
+		tx_list_msg.append(coded_sym)
+		
 	
 	if debug_opt==1 : print("tx_gen\n %s" %(tx_list_gene))
 	if debug_opt==1 : print("tx_msg\n %s" %(tx_list_msg))
