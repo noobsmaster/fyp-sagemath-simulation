@@ -188,7 +188,13 @@ sample_size = 1000
 k=5
 pool = multiprocessing.Pool() #value for worker count
 
-multiprocessing.pool.map( run_seq(failure,k), range(sample_size))
+result_list=pool.map( main(k), range(sample_size))
+
+pool.close()
+pool.join()
+for i in range(len(result_list)) :
+	if result_list[i]==False :
+		fail +=1
 
 print ("For test case for k=%d running for %d times :" %(k,sample_size))
 percent_fail= 100*failure/sample_size
