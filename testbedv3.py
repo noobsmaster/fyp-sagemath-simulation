@@ -172,32 +172,34 @@ def main(k, debug_opt=0):
 	#check if decode_msg = ori msg
 	if decode_msg == msg_list:
 		if debug_opt==1 : print("decode success")
-		return True
+		return 1
 		
 	else:
 		if debug_opt==1 : print("decode fail")
-		return False
+		print ("fail")
+		return 0
 
 def run_seq(fail,k): # fail due to counting. hmm 
 	result = main (k)
+	print ("1")
 	if result == False :
 		fail += 1
 
-failure = 0		
-sample_size = 1000
-k=5
-pool = multiprocessing.Pool() #value for worker count
 
-result_list=pool.map( main(k), range(sample_size))
+if __name__ == '__main__':
+	failure = 0		
+	sample_size = 100
+	k=10
+	
+	pool = multiprocessing.Pool() #value for worker count
 
-pool.close()
-pool.join()
-for i in range(len(result_list)) :
-	if result_list[i]==False :
-		fail +=1
+	pool.map_async( run_seq(failure,k), range(sample_size))
 
-print ("For test case for k=%d running for %d times :" %(k,sample_size))
-percent_fail= 100*failure/sample_size
-percent_success = 100 - percent_fail
-print ("Failure percentage = %f" %(percent_fail))
-print ("Success percentage = %f" %percent_success)
+	pool.close()
+	pool.join()
+		
+	print ("For test case for k=%d running for %d times :" %(k,sample_size))
+	percent_fail= 100*failure/sample_size
+	percent_success = 100 - percent_fail
+	print ("Failure percentage = %f" %(percent_fail))
+	print ("Success percentage = %f" %percent_success)
