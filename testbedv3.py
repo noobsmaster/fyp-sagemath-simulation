@@ -2,6 +2,7 @@ from bitstring import BitArray
 import copy
 import random
 import multiprocessing
+import time
 
 fcount = None
 #read documentation for random lib
@@ -196,21 +197,33 @@ def init(args1,args2):
 		
 if __name__ == '__main__':
 	fcount = multiprocessing.Value('i',0)
-	sample_size = 100		#times of simulation run to obtain result
+	sample_size = 50000		#times of simulation run to obtain result
 	
 	#threadcount = 1				#number of concurrency thread
-	threadcount = multiprocessing.cpu_count()				#auto set based on number of logical CPU
+	threadcount = multiprocessing.cpu_count()		#auto set based on number of logical CPU
+	tasksize = int(sample_size/100)
+	if tasksize==0 : tasksize=1
 	print ("\nUsing %d parallel thread(s)," %(threadcount))
-	print ("For test case for k=5 running for %d times :" %(sample_size))
+	
 	
 	lock = multiprocessing.Lock()
 	pool = multiprocessing.Pool(threadcount, initializer = init, initargs = (fcount, lock))
-	pool.map_async( run_seq, range(sample_size))
-
+	r = pool.map_async( run_seq, range(sample_size), chunksize=tasksize)
+	
+	print ("%d task(s) has been assigned:"%(r._number_left))
+	
+	while (True):				#progress reporting
+		if (r.ready()): break # Jump out of while loop
+		remaining = r._number_left # How many of the map call haven't been done yet?
+		#remaining =1
+		print ("Waiting for %d tasks to complete..." % remaining)
+		time.sleep(10)			#reporting frequency
+		
 	pool.close()
 	pool.join()
 	failure = int(fcount.value)
-		
+	
+	print ("For test case for k=5 running for %d times with %d parallel thread(s):" %(sample_size,threadcount))
 	percent_fail= 100*failure/sample_size
 	percent_success = 100 - percent_fail
 	print ("Failure percentage = %f" %(percent_fail))

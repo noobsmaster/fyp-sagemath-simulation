@@ -29,7 +29,14 @@ if __name__ == '__main__':
 	pool = Pool(initializer = init, initargs = (fcount,lock ))
 	a=1
 	
-	pool.map(add_fail, range(50000) )
+	r=pool.map_async(add_fail, range(50000) )
+	print (r._number_left)
+	while (True):
+		if (r.ready()): break # Jump out of while loop
+		remaining = r._number_left # How many of the map call haven't been done yet?
+		#remaining =1
+		print ("Waiting for %d tasks to complete..." % remaining)
+		time.sleep(0.25)
 	
 	pool.close()
 	pool.join()
