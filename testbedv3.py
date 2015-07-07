@@ -2,6 +2,8 @@ from bitstring import BitArray
 import copy
 import random
 import multiprocessing
+
+fcount = None
 #read documentation for random lib
 #read documentation for bit array lib
 
@@ -176,29 +178,39 @@ def main(k, debug_opt=0):
 		
 	else:
 		if debug_opt==1 : print("decode fail")
-		print ("fail")
 		return 0
 
-def run_seq(fail,k): # fail due to counting. hmm 
-	result = main (k)
-	print ("1")
-	if result == False :
-		fail += 1
-
-
-if __name__ == '__main__':
-	failure = 0		
-	sample_size = 100
-	k=10
+def run_seq(a):
+	global fcount
+	global lock
+	result = main (k=5) 			#msg length = 5 symbol
 	
-	pool = multiprocessing.Pool() #value for worker count
-
-	pool.map_async( run_seq(failure,k), range(sample_size))
+	if result == False :
+		with lock : fcount.value += 1
+		
+def init(args1,args2):
+	global fcount
+	global lock
+	fcount = args1
+	lock = args2
+		
+if __name__ == '__main__':
+	fcount = multiprocessing.Value('i',0)
+	sample_size = 100		#times of simulation run to obtain result
+	
+	#threadcount = 1				#number of concurrency thread
+	threadcount = multiprocessing.cpu_count()				#auto set based on number of logical CPU
+	print ("\nUsing %d parallel thread(s)," %(threadcount))
+	print ("For test case for k=5 running for %d times :" %(sample_size))
+	
+	lock = multiprocessing.Lock()
+	pool = multiprocessing.Pool(threadcount, initializer = init, initargs = (fcount, lock))
+	pool.map_async( run_seq, range(sample_size))
 
 	pool.close()
 	pool.join()
+	failure = int(fcount.value)
 		
-	print ("For test case for k=%d running for %d times :" %(k,sample_size))
 	percent_fail= 100*failure/sample_size
 	percent_success = 100 - percent_fail
 	print ("Failure percentage = %f" %(percent_fail))
