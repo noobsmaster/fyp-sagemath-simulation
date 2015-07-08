@@ -178,39 +178,42 @@ def main(k, debug_opt=0):
 	if decode_msg == msg_list:
 		if debug_opt==1 : print("decode success")
 		decode_time = decode_end - decode_start
-		return (1, decode_time)
+		return ( 1,decode_time)
 		
 	else:
 		if debug_opt==1 : print("decode fail")
-		return (0, 0)
+		return (0,int(0))
 
 def run_seq(a):
 	global fcount
 	global lock
-	global timelist
+	global timedump
 	result, decode_time = main (k=5) 			#msg length = 5 symbol
 	
 	if result == False :
 		with lock : fcount.value += 1
 	
-	if decode_time != 0:
-		timelist.append(decode_time)	
-		print (len(timelist))
+#	if decode_time != 0:
+	#print ("write %d" %a)
+		
+	else :
+		with lock : timedump.value = timedump.value + decode_time
+	
 	
 def init(args1,args2,args3):
 	global fcount
 	global lock
-	global timelist
+	global timedump
 	fcount = args1
 	lock = args2
-	timelist = args3
+	timedump = args3
 		
 if __name__ == '__main__':
 	
-	sample_size = 10		#times of simulation run to obtain result
+	sample_size = 1000		#times of simulation run to obtain result
 	
-	#threadcount = 1				#number of concurrency thread
-	threadcount = multiprocessing.cpu_count()		#auto set based on number of logical CPU
+	threadcount = 3				#number of concurrency thread
+	#threadcount = multiprocessing.cpu_count()		#auto set based on number of logical CPU
 	tasksize = int(sample_size/100)
 	if tasksize==0 : tasksize=1
 	
@@ -219,8 +222,9 @@ if __name__ == '__main__':
 	
 	lock = multiprocessing.Lock()
 	fcount = multiprocessing.Value('i',0)
-	timelist = []
-	pool = multiprocessing.Pool(threadcount, initializer = init, initargs = (fcount, lock, timelist))
+	timedump = multiprocessing.Value('d',0)
+	
+	pool = multiprocessing.Pool(threadcount, initializer = init, initargs = (fcount, lock, timedump))
 	r = pool.map_async( run_seq, range(sample_size), chunksize=tasksize)
 	
 	print ("%d task(s) has been assigned:"%(r._number_left))
@@ -228,17 +232,18 @@ if __name__ == '__main__':
 	while (True):				#progress reporting
 		if (r.ready()): break # Jump out of while loop
 		remaining = r._number_left # How many of the map call haven't been done yet?
-		#remaining =1
 		print ("Waiting for %d tasks to complete..." % remaining)
 		time.sleep(1)			#reporting frequency
 		
 	pool.close()
 	pool.join()
 	failure = int(fcount.value)
-	
-	print ("For test case for k=5 running for %d times with %d parallel thread(s):" %(sample_size,threadcount))
+	average_time = timedump.value/(sample_size-failure)
+		
+	print ("\nFor test case for k=5 running for %d times with %d parallel thread(s):" %(sample_size,threadcount))
 	percent_fail= 100*failure/sample_size
 	percent_success = 100 - percent_fail
 	print ("Failure percentage = %f" %(percent_fail))
-	print ("Success percentage = %f" %percent_success)
-	print ("sample acquired : %d " %(len(timelist)) )
+	print ("Success percentage = %f \n" %percent_success)
+	print ("Total time for %d times = %f" %(sample_size, timedump.value))
+	print ("Average time needed for decoding: %f seconds" %(average_time) )
