@@ -174,11 +174,10 @@ def decode(rx_list_gene, rx_list_msg, debug_opt=0):
 
 	if debug_opt==1 : print("identi_gen\n %s" %(iden_mat_gene))
 	if debug_opt==1 : print("decode_msg\n %s" %(decode_msg))
-		
+	
 	#check if decode_msg = ori msg
-	if decode_msg == msg_list:
-		#if debug_opt==1 : 
-		print("decode success")
+	if iden_mat_gene == iden_mat:
+		if debug_opt==1 : print("decode success")
 		decode_time = decode_end - decode_start
 		return (1, decode_time)
 		
@@ -192,6 +191,7 @@ def run_seq(a):
 	global timedump
 	global work_gen
 	global work_msg
+	global iden_mat
 	result,decode_time = decode(work_gen[a],work_msg[a]) 
 	
 	if result == False :
@@ -200,23 +200,34 @@ def run_seq(a):
 	else :
 		with lock : timedump.value = timedump.value + decode_time
 	
-def init(args1,args2,args3,args4,args5):
+
+def init(args1,args2,args3,args4,args5,args6):
 	global fcount
 	global lock
 	global timedump
 	global work_gen
 	global work_msg
+	global iden_mat
 	fcount = args1
 	lock = args2
 	timedump = args3
 	work_gen = args4
 	work_msg = args5
+	iden_mat = args6
 		
 if __name__ == '__main__':
 	
-	sample_size = 100		#times of simulation run to obtain result
+	k=5
+	
+	sample_size = 1000	#times of simulation run to obtain result
 		
-	work_gen, work_msg = work_prep(k=5, work_size = sample_size)	#generation of workload
+	work_gen, work_msg = work_prep(k, sample_size)	#generation of workload
+	
+	iden_mat = [None]*k
+	for i in range(k):
+		iden_mat[i] = BitArray(length = k)
+		iden_mat[i][i] = True
+	
 	
 	#threadcount = 1				#number of concurrency thread
 	threadcount = multiprocessing.cpu_count()		#auto set based on number of logical CPU
@@ -229,7 +240,7 @@ if __name__ == '__main__':
 	fcount = multiprocessing.Value('i',0)
 	timedump = multiprocessing.Value('d',0)
 	
-	pool = multiprocessing.Pool(threadcount, initializer = init, initargs = (fcount, lock, timedump, work_gen, work_msg))
+	pool = multiprocessing.Pool(threadcount, initializer = init, initargs = (fcount, lock, timedump, work_gen, work_msg, iden_mat))
 	r = pool.map_async( run_seq, range(sample_size), chunksize=tasksize)
 	
 	print ("%d task(s) has been assigned:"%(r._number_left))
