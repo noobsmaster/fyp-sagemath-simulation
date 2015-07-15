@@ -139,106 +139,101 @@ def msg_encoding(gen_row, msg_list):
 	
 	return 	encoded_symbol
 
-#main	
-def main(k, debug_opt=0):
-	
-	msg_list = rand_msg_generation(k)
-	tx_list_gene= []
-	tx_list_msg = []
-	
-	for i in range(k+30):
-		gene=rand_gene_generation(k)
-		coded_sym = msg_encoding(gene, msg_list)
-		tx_list_gene.append(gene)
-		tx_list_msg.append(coded_sym)
+#generation of workload
+def work_prep(k, work_size):
+	worklist_gen = []
+	worklist_msg = []
+	for i in range(work_size):
+		msg_list = rand_msg_generation(k)
+		tx_list_gene= []
+		tx_list_msg = []
 		
-	if debug_opt==1 : print("tx_gen\n %s" %(tx_list_gene))
-	if debug_opt==1 : print("tx_msg\n %s" %(tx_list_msg))
+		for gen_i in range(k+10):
+			gene=rand_gene_generation(k)
+			coded_sym = msg_encoding(gene, msg_list)
+			tx_list_gene.append(gene)
+			tx_list_msg.append(coded_sym)
+							
+		worklist_gen.append(tx_list_gene)
+		worklist_msg.append(tx_list_msg)
 		
-	rx_list_gene,rx_list_msg = rand_selection_kplus10(tx_list_gene, tx_list_msg)
+	return (worklist_gen, worklist_msg)
+
+#decoding of workload	
+def decode(rx_list_gene, rx_list_msg, debug_opt=0):
 	
-	if debug_opt==1 : print("rx_gen\n %s" %(rx_list_gene))
-	if debug_opt==1 : print("rx_msg\n %s" %(rx_list_msg))
-	
-	decode_start = time.time()
 	tri_mat_gene,tri_mat_msg= triangle_mat_decompo(rx_list_gene, rx_list_msg)
 	
 	if debug_opt==1 : print("tri_gen\n %s" %(tri_mat_gene))
 	if debug_opt==1 : print("tri_msg\n %s" %(tri_mat_msg))
 		
 	iden_mat_gene,decode_msg= solve_triangular_matrix(tri_mat_gene, tri_mat_msg)
-	decode_end = time.time()
-
+	
 	if debug_opt==1 : print("identi_gen\n %s" %(iden_mat_gene))
 	if debug_opt==1 : print("decode_msg\n %s" %(decode_msg))
-		
-	if debug_opt==1 : print("ori\n %s" %(msg_list)) 
 	
-	#check if decode_msg = ori msg
-	if decode_msg == msg_list:
-		if debug_opt==1 : print("decode success")
-		return 1
-		
-	else:
-		if debug_opt==1 : print("decode fail")
-		return 0
+	
 
 def run_seq(a):
 	global fcount
 	global lock
-	result = main (k=5) 			#msg length = 5 symbol
+	global work_gen
+	global work_msg
 	
-	if result == False :
-		with lock : fcount.value += 1
+	decode(work_gen[a],work_msg[a]) 
+	
+	
 		
-	
-def init(args1,args2):
+
+def init(args1,args2,args3,args4):
 	global fcount
 	global lock
+	global work_gen
+	global work_msg
 	fcount = args1
 	lock = args2
+	work_gen = args3
+	work_msg = args4
 		
 if __name__ == '__main__':
 	
-	sample_size = 10000		#times of simulation run to obtain result
+	k=5
 	
-	threadcount = 2				#number of concurrency thread
+	sample_size = 100000	#times of simulation run to obtain result
+	
+		
+	work_gen, work_msg = work_prep(k, sample_size)	#generation of workload
+	
+		
+	threadcount = 5				#number of concurrency thread
 	#threadcount = multiprocessing.cpu_count()		#auto set based on number of logical CPU
-	tasksize = int(sample_size/100)
-	if tasksize==0 : tasksize=1
-	
-	print ("\nUsing %d thread(s)," %(threadcount))
-	
+		
+	print ("\nUsing %d parallel thread(s)," %(threadcount))
 	
 	lock = multiprocessing.Lock()
 	fcount = multiprocessing.Value('i',0)
 	
 	time_start = time.time()
 	
-	pool = multiprocessing.Pool(threadcount, initializer = init, initargs = (fcount, lock))
-	r = pool.map_async( run_seq, range(sample_size), chunksize=tasksize)
+	pool = multiprocessing.Pool(threadcount, initializer = init, initargs = (fcount, lock, work_gen, work_msg))
+	r = pool.map_async( run_seq, range(sample_size) )
 	
-	print ("%d task(s) has been assigned:"%(r._number_left))
-	"""
-	while (True):				#progress reporting
-		if (r.ready()): break # Jump out of while loop
-		remaining = r._number_left # How many of the map call haven't been done yet?
-		print ("Waiting for %d tasks to complete..." % remaining)
-		time.sleep(1)			#reporting frequency
-		"""
 	pool.close()
 	pool.join()
 	
-	time_end = time.time()
+	time_end= time.time()
 	
 	failure = int(fcount.value)
+	
 	total_time = time_end-time_start
 	average_time = total_time/(sample_size-failure)
-		
+	
 	print ("\nFor test case for k=5 running for %d times with %d parallel thread(s):" %(sample_size,threadcount))
 	percent_fail= 100*failure/sample_size
 	percent_success = 100 - percent_fail
+	
 	print ("Failure percentage = %f" %(percent_fail))
 	print ("Success percentage = %f \n" %percent_success)
+	
 	print ("Total time for %d times = %f" %(sample_size, total_time))
 	print ("Average time needed for decoding: %f seconds" %(average_time) )

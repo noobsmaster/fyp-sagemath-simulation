@@ -1,44 +1,61 @@
+from bitstring import BitArray
+import copy
+import random
+import multiprocessing
 import time
-from multiprocessing import Value, Lock, Pool
-fcount = None
 
-def add_fail(a):
-	global fcount
-	global lock
-	with lock :
-		fcount.value += 1
-	return("1")	#problem with return
+def rand_gene_generation(msg_length):	# 1row x k-column
+	
+	gene_row = BitArray( [ random.choice ( [1,0] ) for i in range(msg_length) ] )
+	
+	return gene_row
+	
 
-def print_1(a):
-	print('##2')
-	print (fcount.value)
-	print(a)
+#generate 1 column of random sym for msg randomize purpose	
+def rand_msg_generation(msg_length):
 	
+	msg_col = [ BitArray( [random.choice ( [1,0] )] ) for i in range(msg_length) ]
 	
-	time.sleep(1)
+	return msg_col			# k-row x 1column 
 
-def init(args1,args2):
-	global fcount
-	global lock
-	fcount = args1
-	lock = args2
+
+#multiplication of vector for encoding
+def msg_encoding(gen_row, msg_list):
+	k=len(msg_list)
+	encoded_symbol = BitArray('0b0')
+	for i in range(k):
+		if msg_list[i][0] != 0 and gen_row[i] != 0:
+			encoded_symbol = encoded_symbol^BitArray('0b1')
 	
-if __name__ == '__main__':
-	fcount = Value('i', 0)
-	lock = Lock()
-	pool = Pool(initializer = init, initargs = (fcount,lock ))
-	a=1
+	return 	encoded_symbol
 	
-	r=pool.map_async(add_fail, range(50000) )
-	print (r._number_left)
-	while (True):
-		if (r.ready()): break # Jump out of while loop
-		remaining = r._number_left # How many of the map call haven't been done yet?
-		#remaining =1
-		print ("Waiting for %d tasks to complete..." % remaining)
-		time.sleep(0.25)
-	
-	pool.close()
-	pool.join()
+k=5
+sample_size=100
+
+worklist_gen = []
+worklist_msg = []
+for i in range(sample_size):
+	msg_list = rand_msg_generation(k)
+	tx_list_gene= []
+	tx_list_msg = []
 		
-	print (fcount.value)
+	for gen_i in range(k+10):
+		gene=rand_gene_generation(k)
+		coded_sym = msg_encoding(gene, msg_list)
+		tx_list_gene.append(gene)
+		tx_list_msg.append(coded_sym)
+							
+	worklist_gen.append(tx_list_gene)
+	worklist_msg.append(tx_list_msg)
+		
+to_file_1 = open('file1','w+b')
+to_file_2 = open('file2','w+b')
+
+to_file_1.write(worklist_gen)
+to_file_2.write(worklist_msg)
+
+gen = to_file_1.read()
+msg = to_file_2.read()
+
+if gen == worklist_gen :
+	print ('yes')
