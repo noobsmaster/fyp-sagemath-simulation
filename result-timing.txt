@@ -1,0 +1,33 @@
+Result:
+Measured only decoding time, with pre generated worksets
+All test are done with message length K =5, decoded with K+10 message and samplesize of 100000 times (100k)
+
+1 thread : 107.223415
+2 threads: 310.726586
+3 threads: 339.561706
+4 threads: 552.213597
+5 threads: 1076.902734
+
+tested with samplesize of 10000 times (10k)
+
+1 thread : 29.455818
+2 threads: 29.988830
+3 threads: 37.214548
+4 threads: 45.955023
+5 threads: 56.805624
+6 threads: 65.885530
+
+
+Measure whole simulation process
+All test are done with message length K =5, decoded with K+10 message and ran for 10000 times (10k)
+
+1 thread : 74.773828
+2 threads: 38.719383
+3 threads: 26.106773
+4 threads: 20.156603
+5 threads: 19.773843
+6 threads: 19.619038
+7 threads: 20.007967
+8 threads: 19.893069
+9 threads: 19.981314
+10 threads:19.986862

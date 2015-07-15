@@ -202,7 +202,7 @@ if __name__ == '__main__':
 	
 	sample_size = 10000		#times of simulation run to obtain result
 	
-	threadcount = 2				#number of concurrency thread
+	threadcount = 10				#number of concurrency thread
 	#threadcount = multiprocessing.cpu_count()		#auto set based on number of logical CPU
 	tasksize = int(sample_size/100)
 	if tasksize==0 : tasksize=1

@@ -199,13 +199,13 @@ if __name__ == '__main__':
 	
 	k=5
 	
-	sample_size = 100000	#times of simulation run to obtain result
+	sample_size = 10000	#times of simulation run to obtain result
 	
 		
 	work_gen, work_msg = work_prep(k, sample_size)	#generation of workload
 	
 		
-	threadcount = 5				#number of concurrency thread
+	threadcount = 6			#number of concurrency thread
 	#threadcount = multiprocessing.cpu_count()		#auto set based on number of logical CPU
 		
 	print ("\nUsing %d parallel thread(s)," %(threadcount))
