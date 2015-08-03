@@ -1,0 +1,33 @@
+m = size of divided matrix
+function FormPartialUpperTriangularMatrix(partialMat)
+	resultMat = null matrix
+	for i = 0 to m-1 do
+		pivotRow = SearchPivotRow(i,partialMat)
+		Search ith pivoting row from randMat as pivotRow
+		if pivotRow not found :
+			ith row = null row
+			continue for loop(skip rest of this loop iteration)
+		end if
+		for row in randMat do
+			if ith entry of row is non-zero then
+				row <- row XOR pivotRow
+			end if
+		end for
+	end for
+	return resultMat
+end function
+
+function MergingPartialUpperTriangularMatrix(partialMatTop,partialMatBtm)
+	for j = 0 to m-1 do
+		if jth row of partialMatTop = null row
+			jth row of partialMatTop = jth row of partialMatBtm
+			jth row of partialMatBtm = null row
+			end if
+		for i = 0 to m-1 do
+			if ith entry of jth row of partialMatBtm is non-zero then
+				row <- row XOR ith row of partialMatTop
+			end if
+		end for
+	end for
+	return(partialMatTop,partialMatBtm)
+end function

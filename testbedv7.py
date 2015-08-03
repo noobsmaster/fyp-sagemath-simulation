@@ -143,6 +143,8 @@ def msg_encoding(gen_row, msg_list):
 def work_prep(k, work_size):
 	worklist_gen = []
 	worklist_msg = []
+	
+	print ("\nPreparing work load of %d cycle of simulation..."%(100))
 	for i in range(work_size):
 		msg_list = rand_msg_generation(k)
 		tx_list_gene= []
@@ -175,50 +177,40 @@ def decode(rx_list_gene, rx_list_msg, debug_opt=0):
 	
 
 def run_seq(a):
- 
+
 	global work_gen
 	global work_msg
+	
 	
 	decode(work_gen[a],work_msg[a]) 
 	
-	
-		
 
-def init(args1,args2):	#init func for pool workers
 
-	global work_gen
-	global work_msg
-	
-	work_gen = args1
-	work_msg = args2
-		
+
 if __name__ == '__main__':
 	
 	k=5
-	
-	sample_size = 10000	#times of simulation run to obtain result
-	
-		
-	work_gen, work_msg = work_prep(k, sample_size)	#generation of workload
-	
-		
+	sample_size = 100	#times of simulation run to obtain result
+
+	work_gen, work_msg = work_prep(k, sample_size)	#generation of workload	
 	threadcount = 6			#number of concurrency thread
 	#threadcount = multiprocessing.cpu_count()		#auto set based on number of logical CPU
-		
-	print ("\nUsing %d parallel thread(s)," %(threadcount))
-		
+	
+	print ("Work preparation completed.")
+	print ("\nUsing %d parallel thread(s), start decoding..." %(threadcount))
+	
+	pool = multiprocessing.Pool(threadcount)
+	
 	time_start = time.time()
 	
-	pool = multiprocessing.Pool(threadcount, initializer = init, initargs = (work_gen, work_msg))
 	r = pool.map_async( run_seq, range(sample_size) )
 	
 	pool.close()
 	pool.join()
 	
 	time_end= time.time()
-	
+		
 	total_time = time_end-time_start
-	
 	average_time = total_time/sample_size
 	
 	print ("\nFor test case for k=5 running for %d times with %d parallel thread(s):" %(sample_size,threadcount))
