@@ -2,6 +2,9 @@ def FormPartialUpperTriangularMatrix(partialMat,m):
 	resultMat=[]
 	for i in range(m-1):
 		#search for 1 in the 1st column, break on 1st encounter, cut row from partial mat to result mat.
+		for j in range(m-1):
+			if partialMat[j][i] == 1:
+				partialMat
 		#if not pivot not found, set row to zero, add rowIndex into errList, continue for loop
 		#perform row opeartion to clear out column
 		#rinse and repeat!
