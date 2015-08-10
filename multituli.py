@@ -154,20 +154,28 @@ def work_prep(k, work_size):
 
 	return (worklist_gen, worklist_msg)
 
-def FormPartialUpperTriangularMatrix(partialMatIn,m):
+def FormPartialUpperTriangularMatrix(partialMatIn,partialMatIn_msg):
+
 	partialMat = copy.copy(partialMatIn)
+	partialMat_msg = copy.copy(partialMat_msg)
+
 	resultMat = []
+	resultMsg = []
 	nullRow = []
 	errList = []
-	for pivotIndex in range(m-1):
+	m = len(partialMat)
+
+	for pivotIndex in range(m):
 		#search for 1 in the 1st column, break on 1st encounter, cut row from partial mat to result mat.
-		for rowIndex in range(len(partialMat)-1):
+		for rowIndex in range(len(partialMat)):
 			if partialMat[rowIndex][pivotIndex] != 0:
 				resultMat.append(partialMat.pop([rowIndex]))
+				resultMsg.append(partialMat_msg.pop([rowIndex]))
 				break
 
 		else :
 			resultMat.append(nullRow)
+			resultMsg.append(nullRow)
 			errList.append(pivotIndex)
 			continue
 		#if not pivot not found, set row to null, add rowIndex into errList, continue for loop
@@ -175,40 +183,60 @@ def FormPartialUpperTriangularMatrix(partialMatIn,m):
 		for rowIndex in range(len(partialMat)-1):
 			if partialMat[rowIndex][pivotIndex] != 0:
 				partialMat[rowIndex] = partialMat[rowIndex]^resultMat[pivotIndex]
+				partialMat_msg[rowIndex] = partialMat_msg[rowIndex]^resultMsg[pivotIndex]
 
-		for j in range(m-1):
-			if partialMat[j][i] == 1:
-				partialMat
-		#if not pivot not found, set row to zero, add rowIndex into errList, continue for loop
 		#perform row opeartion to clear out column
 		#rinse and repeat!
 
 	if errList != []: #if errList not empty
 		for rowIndex in err:
 			resultMat[rowIndex] = partialMat.pop()
+			resultMsg[rowIndex] = partialMat_msg.pop()
 		#replace row in errList with leftover row in partial mat
 
-	return resultMat
+	return resultMat,resultMsg
 
-def MergingPartialUpperTriangularMatrix(partialMatTop,partialMatBtm,m):
-	for columnIndex in range(m-1):
+#forming upper triangular matrix as if 2 matrix are together, functions assuming len(top) >= len(btm)
+def MergingPartialUpperTriangularMatrix(partialMatTop, partialMatBtm, partialMatTop_m, partialMatBtm_m):
+
+	for columnIndex in range(len(partialMatTop)):
 		if partialMatTop[columnIndex][columnIndex]==0:
 			assert partialMatBtm[columnIndex][columnIndex] != 0 , "Unable to find pivot for row/column %d" % columnIndex #assert pivot can be found at btm if missin in top
-			
+
 			tempRow = copy.copy(partialMatTop[columnIndex]) 		#swap row from btm to top
 			partialMatTop[columnIndex] = copy.copy(partialMatBtm[columnIndex])
 			partialMatBtm[columnIndex] = copy.copy(tempRow)
-			
+
+			tempRow = copy.copy(partialMatTop_m[columnIndex]) 		#swap row from btm to top
+			partialMatTop_m[columnIndex] = copy.copy(partialMatBtm_m[columnIndex])
+			partialMatBtm_m[columnIndex] = copy.copy(tempRow)
+
 		#clear bottom left quarter
-		for rowIndex in range(m-1):
+		for rowIndex in range(len(partialMatBtm)):
 			if partialMatBtm[rowIndex][columnIndex] != 0
 				partialMatBtm[rowIndex] = partialMatBtm[rowIndex]^partialMatTop[columnIndex]
+				partialMatBtm_m[rowIndex] = partialMatBtm_m[rowIndex]^partialMatTop_m[columnIndex]
+
+	return partialMatTop, partialMatBtm, partialMatTop_m, partialMatBtm_m
+
+#spliting matrix into more equal matrix , top must be >= btm
+def spliting_mat(gene_mat, cmsg_column):
+	input_len = len(gene_mat)
+	if (input_len % 2 != 0):
+		input_len = input_len - 1
+	out_len_btm = input_len/2
+	for rowIndex in range(out_len_btm):
+
+
 
 def main():
 	k = 6
+
 	msg_column = rand_msg_generation(k)
 	gene_mat = random_gene_generation(k)
 	encoded_msg_column = []
-	for i in range(k-1):
+
+	for i in range(len(gene_mat)):		#encoding msg to a column
 		encoded_msg_column.append(msg_encoding(gene_mat[i],msg_column))
-	
+
+
