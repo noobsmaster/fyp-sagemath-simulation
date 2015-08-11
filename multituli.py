@@ -219,14 +219,27 @@ def MergingPartialUpperTriangularMatrix(partialMatTop, partialMatBtm, partialMat
 
 	return partialMatTop, partialMatBtm, partialMatTop_m, partialMatBtm_m
 
-#spliting matrix into more equal matrix , top must be >= btm
-def spliting_mat(gene_mat, cmsg_column):
+#splitting matrix into more equal matrix , top must be >= btm
+def splitting_mat(gene_mat, cmsg_column):
+	
+	gene_top = []
+	gene_btm = []
+	cmsg_top = []
+	cmsg_btm = []
+	
 	input_len = len(gene_mat)
 	if (input_len % 2 != 0):
 		input_len = input_len - 1
 	out_len_btm = input_len/2
-	for rowIndex in range(out_len_btm):
-
+	
+	for rowIndex in range(out_len_btm):		#put number of rows in btm based on divided number
+		gene_btm.append(gene_mat.pop())
+		cmsg_btm.append(cmsg_column.pop())
+	
+	gene_top = gene_mat						#put rest of the rows in top
+	cmsg_top = cmsg_column
+	
+	return gene_top, gene_btm, cmsg_top, cmsg_btm
 
 
 def main():
@@ -239,4 +252,12 @@ def main():
 	for i in range(len(gene_mat)):		#encoding msg to a column
 		encoded_msg_column.append(msg_encoding(gene_mat[i],msg_column))
 
-
+	remain_msg_len = len(msg_column)
+	
+	while remain_msg_len > 4:
+		gene_top, gene_btm, cmsg_top, cmsg_btm = splitting_mat(gene_mat, encoded_msg_column)
+		
+		tri_gene_top, tri_msg_top = FormPartialUpperTriangularMatrix(gene_top, cmsg_top)
+		tri_gene_btm, tri_msg_btm = FormPartialUpperTriangularMatrix(gene_btm, cmsg_btm)
+		
+		MergingPartialUpperTriangularMatrix(tri_gene_top, tri_gene_btm, tri_msg_top, tri_msg_btm)
