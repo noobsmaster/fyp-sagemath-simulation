@@ -1,32 +1,31 @@
+matrix[i][j] indicates the ith row, jth column element of the martrix
 m = row size of divided matrix
-function FormPartialUpperTriangularMatrix(partialMat)
-	resultMat = null matrix
-	for i = 0 to m-1 do
-		Search ith pivoting row from partialMat as ith pivotRow, delete row from partialMat
-		if pivotRow not found :
+def form_partial_upper_triangular_matrix(partial_mat):
+	result_mat = null matrix
+	for pivot_index = 0 to m-1 :
+		find pivot_row of pivot_index from partial_mat as result_mat[pivot_index], del pivot_row from partial_mat
+		if pivot_row not found :
 			continue for loop(skip rest of this loop iteration)
-		for row in partialMat do
-			if ith entry of row is non-zero then
-				row <- row XOR pivotRow
-			end if
-		end for
-	end for
-	if partialMat not empty:
-		insert remaining rows of partialMat in to resultMat which pivotRow not found
-	return resultMat
+		
+		for row_index in partial_mat :		#clearing value below pivot
+			if partial_mat[row_index][pivot_index] is non-zero then
+				row <- row XOR pivot_row
+ 
+	if partial_mat not empty:		#replace empty row(pivot not found) with remaining row in partial_mat
+		insert remaining rows of partial_mat in to result_mat which pivot_row not found
+	
+	return result_mat
 end function
 
-function MergingPartialUpperTriangularMatrix(partialMatTop,partialMatBtm)
-	for i = 0 to m-1 do
-		if ith entry of ith row of partialMatTop == 0	
-			assert ith entry of ith row of partialMatBtm == 1
-			exchange ith row of partialMatTop with ith row of partialMatBtm
-		end if
-		for j = 0 to m-1 do
-			if ith entry of jth row of partialMatBtm is non-zero then
-				row <- row XOR ith row of partialMatTop
-			end if
-		end for
-	end for
-	return(partialMatTop,partialMatBtm)
+def merging_partial_upper_triangular_matrix(partial_mat_top,partial_mat_btm):
+	for pivot_index = 0 to m-1 :		#replacing pivot notfound row in top from rows in bottom
+		if partial_mat_top[pivot_index][pivot_index] == 0	
+			assert partial_mat_btm[pivot_index][pivot_index] == 1
+			exchange partial_mat_top[pivot_index][pivot_index] with partial_mat_btm[pivot_index][pivot_index]
+
+		for row_index = 0 to m-1 :		#clearing bottom left quarter
+			if partial_mat_btm[row_index][pivot_index] is non-zero then
+				row <- row XOR ith row of partial_mat_top
+
+	return(partial_mat_top,partial_mat_btm)
 end function 

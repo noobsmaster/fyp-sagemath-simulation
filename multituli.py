@@ -254,7 +254,7 @@ def main():
 
 	remain_msg_len = len(msg_column)
 	
-	while remain_msg_len > 4:
+	for partialIndex in range(k):
 		gene_top, gene_btm, cmsg_top, cmsg_btm = splitting_mat(gene_mat, encoded_msg_column)
 		
 		tri_gene_top, tri_msg_top = FormPartialUpperTriangularMatrix(gene_top, cmsg_top)
