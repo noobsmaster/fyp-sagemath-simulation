@@ -1,0 +1,40 @@
+Algorithm 1 Binary Gaussian Elimination
+Require : Regular matrix A e {0,1} ^nxn
+
+for each column k = 1 : n do
+	s:=k
+	while ask = 0 do 	//searching pivot
+		s := s+1
+	exchange ak with as
+	for each row i = 1 : n do
+		if ( i noequal k) ^ aik = 1 then
+			for each element j = k : n do
+			 aij := aij # akj
+
+Algorithm 2 
+
+Require : Regular matrix A e {0,1} ^nxn
+B,C := split(A)
+B e {0,1} ^mxn
+
+for matrix B and C in seperate thread:
+
+	for each column k = 1 : m do
+		s:=k
+		while ask = 0 do 	//searching pivot
+			s := s+1
+		exchange ak with as
+		for each row i = k : m do
+			if ( i noequal k) ^ aik = 1 then
+				for each element j = k : n do
+				 aij := aij # akj
+
+then 
+for each pivot index p = 1 : m do
+	if Bpp = 0 do
+		exchange row Bp with row Cp
+	
+	for each row i = 1 : m do
+		if Cip = 1 then
+			for each element j = p : n do
+				Cij := Cij # Bij
